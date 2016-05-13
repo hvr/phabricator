@@ -110,6 +110,8 @@ final class DifferentialGetCommitMessageConduitAPIMethod
     $key_title = id(new DifferentialTitleField())->getFieldKey();
     $default_title = DifferentialTitleField::getDefaultTitle();
 
+    $key_summary = id(new DifferentialSummaryField())->getFieldKey();
+
     $commit_message = array();
     foreach ($field_list->getFields() as $key => $field) {
       $handles = array_select_keys($all_handles, $phids[$key]);
@@ -127,17 +129,18 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       }
 
       $is_title = ($key == $key_title);
+      $is_summary = ($key == $key_summary);
 
       if (!strlen($value)) {
         if ($is_title) {
           $commit_message[] = $default_title;
         } else {
-          if ($is_edit && $field->shouldAppearInCommitMessageTemplate()) {
+          if (!$is_summary && $is_edit && $field->shouldAppearInCommitMessageTemplate()) {
             $commit_message[] = $label.': ';
           }
         }
       } else {
-        if ($is_title) {
+        if ($is_title || $is_summary) {
           $commit_message[] = $value;
         } else {
           $value = str_replace(
